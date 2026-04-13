@@ -36,5 +36,67 @@ MIMIC-CXR: https://physionet.org/content/mimic-cxr/2.1.0/
 
 Place the files under data/raw/.
 
+After download, the expected layout is:
+
+```
+data/raw/
+├── CHIFIR_reports_dev.csv
+├── CHIFIR_reports_test.csv
+├── PIFIR_reports_dev.csv
+├── PIFIR_reports_test.csv
+├── MIMIC_reports_dev.csv     # MIMIC → PIFIR setting only
+└── MIMIC_reports_test.csv
+```
+
+## Quickstart
+
+Tested with Python 3.10 and a single CUDA GPU (CPU also works for the smoke test).
+
+```bash
+# 1. Create environment
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+# 2. Place clinical CSVs under data/raw/ (see Data Access above)
+
+# 3. Run the CHIFIR → PIFIR pipeline
+python -m scripts.run_chifir_to_pifir --config configs/chifir_to_pifir.yaml
+
+# 4. Run the MIMIC-CXR → PIFIR pipeline
+python -m scripts.run_mimic_to_pifir --config configs/mimic_to_pifir.yaml
+```
+
+Each script will:
+
+1. fine-tune the source-domain classifier (ClinicalBERT by default) and save a
+   checkpoint under `outputs/<experiment>/source_ckpt/best/`,
+2. run MC-dropout to compute BALD features over the target pool,
+3. train the dueling-DQN selector and write `selected_indices.json` plus a
+   `selection_summary.json` to `outputs/<experiment>/`.
+
+To reuse a previously trained source checkpoint and skip step (1):
+
+```bash
+python -m scripts.run_chifir_to_pifir \
+    --config configs/chifir_to_pifir.yaml \
+    --source-checkpoint outputs/chifir_to_pifir/source_ckpt/best
+```
+
+## Repository layout
+
+```
+configs/         YAML configs for each transfer setting
+scripts/         CLI entry points (one per setting)
+src/rads/        Library code: data, train, uncertainty, rl_selector, evaluate, metrics
+tests/           Smoke tests (`pytest tests/`)
+```
+
+## Smoke test
+
+```bash
+pytest tests/
+```
+
 
 ## Citation

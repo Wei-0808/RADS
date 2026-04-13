@@ -1,16 +1,35 @@
 import argparse
-import yaml
+import os
+
 import torch
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+import yaml
+from sklearn.model_selection import train_test_split
 
 from src.rads.data import load_chifir_csv, load_pifir_csv
-from src.rads.uncertainty import build_pool_loader, get_mc_log_probs_on_pool, compute_bald_features_from_log_probs, estimate_pseudo_prior
-from src.rads.rl_selector import build_class_weights, build_sample_weights_from_pseudo_labels, train_rl_selector_for_prior, select_with_trained_agent
+from src.rads.rl_selector import (
+    build_class_weights,
+    build_sample_weights_from_pseudo_labels,
+    select_with_trained_agent,
+    train_rl_selector_for_prior,
+)
+from src.rads.train import SourceTrainConfig, load_source_model, train_source
+from src.rads.uncertainty import (
+    build_pool_loader,
+    compute_bald_features_from_log_probs,
+    estimate_pseudo_prior,
+    get_mc_log_probs_on_pool,
+)
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, required=True)
+    parser.add_argument(
+        "--source-checkpoint",
+        type=str,
+        default=None,
+        help="Path to a pre-trained source checkpoint. If omitted, train_source() is called.",
+    )
     args = parser.parse_args()
 
     cfg = yaml.safe_load(open(args.config))
@@ -19,12 +38,26 @@ def main():
     df_source = load_chifir_csv(cfg["data"]["source_train"])
     df_target = load_pifir_csv(cfg["data"]["target_train"])
 
-    tokenizer = AutoTokenizer.from_pretrained(cfg["model"]["name"])
-    model = AutoModelForSequenceClassification.from_pretrained(cfg["model"]["name"], num_labels=2).to(device)
+    checkpoint = args.source_checkpoint
+    if checkpoint is None:
+        df_src_tr, df_src_val = train_test_split(
+            df_source, test_size=0.1, random_state=cfg["seed"], stratify=df_source["y"]
+        )
+        train_cfg = SourceTrainConfig(
+            model_name=cfg["model"]["name"],
+            output_dir=os.path.join(cfg["output_dir"], "source_ckpt"),
+            text_col=cfg["data"]["text_col"],
+            max_length=cfg["model"]["max_length"],
+            epochs=cfg["training"]["epochs"],
+            learning_rate=cfg["training"]["learning_rate"],
+            batch_size=cfg["training"]["batch_size"],
+            weight_decay=cfg["training"]["weight_decay"],
+            early_stopping_patience=cfg["training"]["early_stopping_patience"],
+            seed=cfg["seed"],
+        )
+        checkpoint = train_source(df_src_tr, df_src_val, train_cfg)
 
-    # TODO:
-    # 1. load a source-finetuned checkpoint instead of random init
-    # 2. or call your train_source() function here
+    model, tokenizer = load_source_model(checkpoint, device=device)
 
     pool_loader = build_pool_loader(df_target[cfg["data"]["text_col"]].tolist(), batch_size=cfg["uncertainty"]["batch_size"])
     log_probs = get_mc_log_probs_on_pool(
