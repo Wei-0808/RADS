@@ -21,18 +21,20 @@ This repository focuses on the two main transfer settings in the paper:
 - CHIFIR → PIFIR
 - MIMIC-CXR → PIFIR
 
-## Repository structure
 
-```text
-RADS/
-├── README.md
-├── LICENSE
-├── .gitignore
-├── requirements.txt
-├── configs/
-├── scripts/
-├── src/rads/
-├── notebooks/
-├── data/
-├── outputs/
-└── tests/
+## Data Access
+
+The original clinical datasets are not redistributed in this repository.
+
+Please obtain them from the official sources:
+
+PIFIR: https://physionet.org/content/pifir/1.0.0/
+
+CHIFIR: https://physionet.org/content/corpus-fungal-infections/1.0.2/
+
+MIMIC-CXR: https://physionet.org/content/mimic-cxr/2.1.0/
+
+Place the files under data/raw/.
+
+
+## Citation
