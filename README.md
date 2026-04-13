@@ -16,7 +16,9 @@ The selected target reports are then annotated and jointly used with the source 
 
 ## Methodology
 
-![RADS methodology overview](docs/method.png)
+<p align="center">
+  <img src="docs/method.png" alt="RADS methodology overview" width="360" />
+</p>
 
 At each step the active learner computes MC-dropout predictions on an unlabelled
 target report `x_i`, yielding the state `s_i` (BALD score, log-probs, predictive
