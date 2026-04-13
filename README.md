@@ -14,6 +14,18 @@ It combines:
 
 The selected target reports are then annotated and jointly used with the source data for transfer learning.
 
+## Methodology
+
+![RADS methodology overview](docs/method.png)
+
+At each step the active learner computes MC-dropout predictions on an unlabelled
+target report `x_i`, yielding the state `s_i` (BALD score, log-probs, predictive
+entropy, budget usage). The RL sampler agent takes action `A_i` — select or
+skip — and receives a reward `R_i` that combines prior-aware utility with a
+diversity / non-redundancy term. Selected reports are annotated and added to
+the target-domain subset used jointly with the source data for transfer
+learning.
+
 ## Main experiments
 
 This repository focuses on the two main transfer settings in the paper:
