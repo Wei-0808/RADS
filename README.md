@@ -1,6 +1,6 @@
 # RADS
 
-Official code for **RADS: Reinforcement Learning-Based Sample Selection Improves Transfer Learning in Low-resource and Imbalanced Clinical Settings**.
+This is the official implementation of **RADS: Reinforcement Learning-Based Sample Selection Improves Transfer Learning in Low-resource and Imbalanced Clinical Settings**.
 
 ## Overview
 
