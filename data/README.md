@@ -10,8 +10,4 @@ Please obtain the datasets from their official sources:
 
 After obtaining access, place the CSV files under `data/raw/`.
 
-Expected columns:
-- `order_results`: report text
-- `y`: binary label after preprocessing
-
 Dataset-specific label mapping is implemented in `src/rads/data.py`.
