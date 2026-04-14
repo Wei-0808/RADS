@@ -58,7 +58,7 @@ data/raw/
 ├── CHIFIR_reports_test.csv
 ├── PIFIR_reports_dev.csv
 ├── PIFIR_reports_test.csv
-├── MIMIC_reports_dev.csv     # MIMIC → PIFIR setting only
+├── MIMIC_reports_dev.csv  
 └── MIMIC_reports_test.csv
 ```
 
