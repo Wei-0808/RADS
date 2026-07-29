@@ -1,7 +1,7 @@
 # RADS
 
 [![Paper](https://img.shields.io/badge/ACL%202026%20Findings-2026.findings--acl.608-b31b1b)](https://aclanthology.org/2026.findings-acl.608/)
-[![arXiv](https://img.shields.io/badge/arXiv-2604.20256-b31b1b)](https://arxiv.org/abs/2604.20256)
+
 
 This is the official implementation of **RADS: Reinforcement Learning-Based Sample
 Selection Improves Transfer Learning in Low-resource and Imbalanced Clinical
@@ -9,7 +9,7 @@ Settings**, published in *Findings of the Association for Computational
 Linguistics: ACL 2026*.
 
 - Paper: https://aclanthology.org/2026.findings-acl.608/
-- Preprint: https://arxiv.org/abs/2604.20256
+
 
 ## Overview
 
