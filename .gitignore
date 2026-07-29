@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# experiment artefacts
+outputs/
+
+# clinical data is never redistributed
+data/raw/
