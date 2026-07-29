@@ -1,4 +1,5 @@
 import argparse
+import json
 import os
 
 import torch
@@ -6,6 +7,7 @@ import yaml
 from sklearn.model_selection import train_test_split
 
 from src.rads.data import load_chifir_csv, load_pifir_csv
+from src.rads.evaluate import summarize_selection
 from src.rads.rl_selector import (
     build_class_weights,
     build_sample_weights_from_pseudo_labels,
@@ -19,6 +21,7 @@ from src.rads.uncertainty import (
     estimate_pseudo_prior,
     get_mc_log_probs_on_pool,
 )
+from src.rads.utils import save_json, set_seed
 
 
 def main():
@@ -32,7 +35,10 @@ def main():
     )
     args = parser.parse_args()
 
-    cfg = yaml.safe_load(open(args.config))
+    with open(args.config, "r") as f:
+        cfg = yaml.safe_load(f)
+
+    set_seed(int(cfg.get("seed", 66)))
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     df_source = load_chifir_csv(cfg["data"]["source_train"])
@@ -95,8 +101,27 @@ def main():
     )
 
     selected_idx = select_with_trained_agent(agent, env, device=device)
+
+    summary = summarize_selection(selected_idx, pseudo_labels=pseudo_labels)
+    summary["best_avg_reward"] = float(best_avg_reward)
+    summary["transfer_setting"] = "CHIFIR_to_PIFIR"
+    summary["rho"] = float(cfg["selection"]["rho"])
+    summary["budget"] = int(cfg["selection"]["budget"])
+    summary["pi_pos"] = float(pi_pos)
+    summary["pi_neg"] = float(pi_neg)
+
     print("Selected target indices:", selected_idx.tolist())
-    print("Best avg reward:", best_avg_reward)
+    print("Selection summary:")
+    print(json.dumps(summary, indent=2))
+
+    output_dir = cfg["output_dir"]
+    save_json(
+        {"selected_indices": [int(x) for x in selected_idx.tolist()]},
+        os.path.join(output_dir, "selected_indices.json"),
+    )
+    save_json(summary, os.path.join(output_dir, "selection_summary.json"))
+
+    print(f"Done. Outputs saved to: {output_dir}")
 
 
 if __name__ == "__main__":

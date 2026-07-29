@@ -61,6 +61,27 @@ def _compute_metrics(eval_pred):
     }
 
 
+def build_training_args(cfg: SourceTrainConfig) -> TrainingArguments:
+    """Build the :class:`TrainingArguments` used for source fine-tuning."""
+    return TrainingArguments(
+        output_dir=cfg.output_dir,
+        num_train_epochs=cfg.epochs,
+        learning_rate=cfg.learning_rate,
+        per_device_train_batch_size=cfg.batch_size,
+        per_device_eval_batch_size=cfg.batch_size,
+        weight_decay=cfg.weight_decay,
+        eval_strategy="epoch",
+        save_strategy="epoch",
+        load_best_model_at_end=True,
+        metric_for_best_model="f1",
+        greater_is_better=True,
+        save_total_limit=2,
+        seed=cfg.seed,
+        report_to=[],
+        logging_steps=20,
+    )
+
+
 def train_source(
     df_train: pd.DataFrame,
     df_val: pd.DataFrame,
@@ -78,23 +99,7 @@ def train_source(
     train_ds = _encode(df_train, tokenizer, cfg)
     val_ds = _encode(df_val, tokenizer, cfg)
 
-    args = TrainingArguments(
-        output_dir=cfg.output_dir,
-        num_train_epochs=cfg.epochs,
-        learning_rate=cfg.learning_rate,
-        per_device_train_batch_size=cfg.batch_size,
-        per_device_eval_batch_size=cfg.batch_size,
-        weight_decay=cfg.weight_decay,
-        evaluation_strategy="epoch",
-        save_strategy="epoch",
-        load_best_model_at_end=True,
-        metric_for_best_model="f1",
-        greater_is_better=True,
-        save_total_limit=2,
-        seed=cfg.seed,
-        report_to=[],
-        logging_steps=20,
-    )
+    args = build_training_args(cfg)
 
     trainer = Trainer(
         model=model,

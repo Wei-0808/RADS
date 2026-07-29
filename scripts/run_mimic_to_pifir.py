@@ -1,9 +1,7 @@
 import argparse
 import json
 import os
-import random
 
-import numpy as np
 import torch
 import yaml
 
@@ -22,20 +20,7 @@ from src.rads.rl_selector import (
     select_with_trained_agent,
 )
 from src.rads.evaluate import summarize_selection
-
-
-def set_seed(seed: int):
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(seed)
-
-
-def save_json(obj, path: str):
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, "w") as f:
-        json.dump(obj, f, indent=2)
+from src.rads.utils import save_json, set_seed
 
 
 def main():
